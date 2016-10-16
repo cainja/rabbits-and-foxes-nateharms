@@ -2,14 +2,14 @@
 # coding: utf-8
 
 # # Rabbits and Foxes
-# 
+#
 # I am running this in Python 2 at the moment becuause matplotlib is not working in my conda install of python 3.
 
 # # Euler's Method
 
 # In[1]:
 
-get_ipython().magic(u'matplotlib inline')
+# get_ipython().magic(u'matplotlib inline')
 
 import matplotlib
 import numpy as np
@@ -56,8 +56,8 @@ while time < t_final:
     t.append(time)
 
 # Generate a plot of Euler's Method
-plt.plot(t, R)
-plt.plot(t, F)
+# plt.plot(t, R)
+# plt.plot(t, F)
 
 
 # # ODEINT Method
@@ -79,7 +79,7 @@ t = np.array(range(t_final)) # Time array
 def pop(cond, t):
     """
     A system of functions that describe the ordinary diff. eqs. for the rabbit and fox population.
-    
+
     `y` is a list with the rabbit and fox population at time `t`.
     """
     R, F = cond
@@ -125,7 +125,7 @@ def F_death(R,F):
 
 # Setting initial conditions
 def kMC():
-    
+
     t = 0
     rabbits = []
     foxes = []
@@ -145,23 +145,23 @@ def kMC():
         f = foxes[-1]
 
         # Determining the rates for each event.
-        R_b = R_birth(r,f) 
+        R_b = R_birth(r,f)
         R_d = R_death(r,f)
         F_b = F_birth(r,f)
         F_d = F_death(r,f)
 
         # Cumulative function
-        sum_rates = R_b + R_d + F_b + F_d 
-        uQ = (1-random.random()) * sum_rates 
+        sum_rates = R_b + R_d + F_b + F_d
+        uQ = (1-random.random()) * sum_rates
 
         # Determining which list to edit
         if uQ <= R_b:
             rabbits.append(r + 1)
             foxes.append(f)
-        elif R_b < uQ <= R_b + R_d:
+        elif uQ <= R_b + R_d:
             rabbits.append(r - 1)
             foxes.append(f)
-        elif R_b + R_d < uQ <= R_b + R_d + F_b:
+        elif uQ <= R_b + R_d + F_b:
             rabbits.append(r)
             foxes.append(f + 1)
         else:
@@ -173,14 +173,16 @@ def kMC():
             del_t = ln(1/(1-random.random())) / sum_rates
             t = t + del_t
             time.append(t)
-        except:
+        except ZeroDivisionError:
             break #del_t has been breaking because of sum_rates = 0, if sum_rates = 0, the reaction has stopped.
-        
+
     return time, foxes, rabbits
-    
-time, foxes, rabbits = kMC()
-plt.plot(time, rabbits)
-plt.plot(time, foxes)
+
+
+# Not necessary for now
+# time, foxes, rabbits = kMC()
+# plt.plot(time, rabbits)
+# plt.plot(time, foxes)
 
 
 # Occasionally, the plot corresponding to the KMC method needs to be re-ran in order to attain a shape similar to the previous solutions.
@@ -196,13 +198,14 @@ plt.plot(time, foxes)
 # This portion is determing the time at which the second peak occurs, the population at the second peak for 100 trials.
 # It also calculated the average population, time, and interquartile range for the foxes and time.
 # Also, it determine how the foxes die
+trials = 100 #Make a little clearer for loop
 Deaths = 0
 Lives = 0
 fox_peak = [0]
 corresponding_time = [0]
-for i in range(100):
+for i in range(trials):
     time, foxes, rabbits = kMC()
-    
+
     if foxes[-1] < 1:
         Deaths += 1
     else:
@@ -214,7 +217,7 @@ for i in range(100):
             else:
                 x = foxes[i]
                 edited_foxes.append(x)
-        
+
         fox_peak.append(max(edited_foxes))
         corresponding_time.append(time[edited_foxes.index(max(edited_foxes))])
 
@@ -228,10 +231,9 @@ time_iqr = np.subtract(*np.percentile(corresponding_time, [75, 25]))
 
 # Determining the percentage of time that the foxes die out before making it day 600.
 total = Deaths + Lives
-percentage = Deaths # because this was run over 100 iterations
+percentage = Deaths/total # just incase you run something other than 100
 
 # Report all the values
 print "The average max number of foxes for the second peak is %i foxes. With an interquartile range of %i." % (average_foxes, fox_iqr)
 print "The average time that the second fox peak occurs at is %0.2f days. With an interquartile range of %0.2f." % (average_time, time_iqr)
-print "The fox population survives to day 600 %0.1f percent of the time." % (percentage)
-
+print "The fox population survives to day 600 %0.1f percent of the time." % (percentage*100)
