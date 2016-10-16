@@ -95,8 +95,8 @@ F_pop = population[:,1] #Fox population (number of foxes)
 
 
 # Plot the results of the odeint method
-plt.plot(t, R_pop)
-plt.plot(t, F_pop)
+# plt.plot(t, R_pop)
+# plt.plot(t, F_pop)
 
 
 # # Kinetic Monte Carlo Method
@@ -169,11 +169,11 @@ def kMC():
             foxes.append(f - 1)
 
         # Change in time according to KMC methods
-        try:
-            del_t = ln(1/(1-random.random())) / sum_rates
+        if not F_b == 0: #If the foxes have died out
+            del_t = ln(1/(1-random.random())) / sum_rates #Sum_rates will only be zero if rabbits have died
             t = t + del_t
             time.append(t)
-        except ZeroDivisionError:
+        else:
             break #del_t has been breaking because of sum_rates = 0, if sum_rates = 0, the reaction has stopped.
 
     return time, foxes, rabbits
@@ -202,7 +202,7 @@ trials = 100 #Make a little clearer for loop
 Deaths = 0
 Lives = 0
 fox_peak = [0]
-corresponding_time = [0]
+corresponding_time = [0.] #static declaration makes it a little faster
 for i in range(trials):
     time, foxes, rabbits = kMC()
 
@@ -212,7 +212,7 @@ for i in range(trials):
         edited_foxes = []
         Lives += 1
         for i in range(len(time)):
-            if i < len(time) // 2:
+            if i < len(time) // 2: #second half
                 edited_foxes.append(0)
             else:
                 x = foxes[i]
